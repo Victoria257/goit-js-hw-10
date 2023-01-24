@@ -1,5 +1,6 @@
 import './css/styles.css';
 import debounce from "lodash.debounce";
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 const DEBOUNCE_DELAY = 300;
 
@@ -13,22 +14,23 @@ function onSearch(event) {
 //    event.preventDefault();
 
     const name = input.value.trim();
-    console.log(name);
+    // console.log(name);
 
     if (name) {
         fetchCountries(name)
             .then(renderCounty)
-            .catch(error => { console.log(error) })
+            .catch(error => { Notify.failure("Oops, there is no country with that name") })
             .finally(() => input.reset);
     } else {
         list.innerHTML = ""
+        countryInfo.innerHTML=""
         return
     } 
 }
 
 function fetchCountries(name) {
 
-    return fetch(`https://restcountries.com/v3.1/name/${name}?fields=name.official,capital,population,flags,languages`)
+    return fetch(`https://restcountries.com/v3.1/name/${name}?fields=name,capital,population,flags,languages`)
         .then(response => {
         // console.log(response)
         return response.json();
@@ -37,36 +39,37 @@ function fetchCountries(name) {
 
 function renderCounty(country) {
 
-    
-
     if (country.length > 10) {
-        console.log("Too many matches found. Please enter a more specific name.");
+        Notify.info("Too many matches found. Please enter a more specific name.");
     } else if (country.length > 1 && country.length <= 10) {
          
         for (let i = 0; i < country.length; i += 1) {
-            const countriesName = country[i].altSpellings[country[i].altSpellings.length - 1];
+            const countriesName = country[i].name.official;
             const flags = country[i].flags.svg;  
-            list.innerHTML += `<li class="country_name"><img src="${flags}" alt="flag of ${countriesName}" width="60"><p class="countru_name">${countriesName}</p>`
+            list.innerHTML += `<li class="country_header_big"><img src="${flags}" alt="flag of ${countriesName}" width="50" ><p class="country_name_big">${countriesName}</p>`;
+            countryInfo.innerHTML =""
         }
     } else {
-    
-const countryName = country[0].altSpellings[country[0].altSpellings.length - 1];
+    const countryName = country[0].name.official;
+    const flag = country[0].flags.svg;
+    const capital = country[0].capital;
+    const population = country[0].population;
+    const languages = Object.values(country[0].languages);
 
-const flag = country[0].flags.svg;
-const capital = country[0].capital;
-const population = country[0].population;
-const languages = Object.values(country[0].languages);
-
-list.innerHTML = `<li class="country_name"><img src="${flag}" alt="flag of ${countryName}" width="60">
-  <p class="countru_name">${countryName}</p>`
-   countryInfo.innerHTML = `<p>Capital:${capital}</p>
-  <p>Population:${population}</p>
-  <p>Languages:${languages}</p>`
-
+        list.innerHTML = `<li class="country_header"><img src="${flag}" alt="flag of ${countryName}" width="80">
+    <p class="country_name">${countryName}</p>`;
+        
+        countryInfo.innerHTML = `<p><span class="description_title">Capital:</span> ${capital}</p>
+    <p><span class="description_title">Population:</span> ${population}</p>
+    <p><span class="description_title">Languages:</span> ${languages}</p>`;
 }
 }
 
-// Напиши функцію fetchCountries(name), яка робить HTTP - запит 
-// на ресурс name і повертає проміс з масивом країн - результатом
-// запиту.Винеси її в окремий файл fetchCountries.js і зроби іменований
+
+// Напиши функцію fetchCountries(name)-Винеси її в окремий файл fetchCountries.js і зроби іменований
 // експорт.
+
+
+// Не забувай про те, що fetch не вважає 404 помилкою,
+//     тому необхідно явно відхилити проміс, щоб можна було зловити 
+//     і обробити помилку.
