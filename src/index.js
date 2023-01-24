@@ -1,4 +1,5 @@
 import './css/styles.css';
+import { fetchCountries } from "./fetchCountries"
 import debounce from "lodash.debounce";
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
@@ -28,15 +29,6 @@ function onSearch(event) {
     } 
 }
 
-function fetchCountries(name) {
-
-    return fetch(`https://restcountries.com/v3.1/name/${name}?fields=name,capital,population,flags,languages`)
-        .then(response => {
-        // console.log(response)
-        return response.json();
-    })
-}
-
 function renderCounty(country) {
 
     if (country.length > 10) {
@@ -64,12 +56,3 @@ function renderCounty(country) {
     <p><span class="description_title">Languages:</span> ${languages}</p>`;
 }
 }
-
-
-// Напиши функцію fetchCountries(name)-Винеси її в окремий файл fetchCountries.js і зроби іменований
-// експорт.
-
-
-// Не забувай про те, що fetch не вважає 404 помилкою,
-//     тому необхідно явно відхилити проміс, щоб можна було зловити 
-//     і обробити помилку.
